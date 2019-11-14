@@ -1,0 +1,40 @@
+{
+  "name": "offline-service-uptime",
+  "version": "1.0.0",
+  "description": "Offline Service Uptime Monitoring",
+  "main": "index.js",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.2",
+    "@types/faker": "^4.1.7",
+    "@types/jsonwebtoken": "^8.3.5",
+    "@types/uuid": "^3.4.6",
+    "apollo-server-express": "^2.9.9",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "faker": "^4.1.0",
+    "graphql": "^14.5.8",
+    "graphql-import": "^0.7.1",
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^7.12.1",
+    "ts-node": "^8.5.0",
+    "typescript": "^3.7.2",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^1.8.3",
+    "@graphql-codegen/introspection": "1.8.3",
+    "@graphql-codegen/typescript": "1.8.3",
+    "@graphql-codegen/typescript-resolvers": "1.8.3",
+    "prettier": "^1.19.1",
+    "ts-node-dev": "^1.0.0-pre.44"
+  },
+  "scripts": {
+    "start": "ts-node src/server.ts",
+    "dev": "ts-node-dev src/server.ts",
+    "generate": "graphql-codegen --config codegen.yml && yarn format",
+    "format": "prettier --config .prettierrc.yml --write './**/*.{graphql,ts,json}'"
+  }
+}

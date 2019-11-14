@@ -1,0 +1,51 @@
+enum ServiceStatus {
+  ONLINE
+  OFFLINE
+}
+
+type Point {
+  lon: Float!
+  lat: Float!
+}
+
+type Service {
+  id: ID!
+  name: String!
+}
+
+type Reporter {
+  id: String!
+  name: String!
+  phone: String!
+}
+
+type ServiceStatusReport {
+  id: ID!
+  reporter: Reporter!
+  service: Service!
+  status: ServiceStatus!
+  location: Point!
+  reportedAt: Float!
+  resolving: ServiceStatusReport
+}
+
+input PointInput {
+  lon: Float!
+  lat: Float!
+}
+
+type Query {
+  serviceUptimePolygon(
+    serviceID: String!
+    status: ServiceStatus!
+    viewport: [PointInput!]!
+  ): [Point!]!
+}
+
+type Mutation {
+  reportServiceStatus(
+    serviceID: String!
+    status: ServiceStatus!
+    location: PointInput!
+  ): ServiceStatusReport!
+}
