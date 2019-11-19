@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS service (
+    id VARCHAR(15) PRIMARY KEY,
+    name VARCHAR(50)
+)
