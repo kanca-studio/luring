@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS reporter (
     id UUID PRIMARY KEY,
     name VARCHAR(20) NOT NULL,
-    phone VARCHAR(15) NOT NULL
+    phone VARCHAR(15)
 )
