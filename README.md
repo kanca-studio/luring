@@ -21,10 +21,11 @@ You'll know where to go, service owners should know what and where to fix, we'll
 
 ### Running
 1. Copy `.env.example` to `.env`, modify variables if necessary
+2. Run a [localtunnel](https://www.npmjs.com/package/localtunnel) (`$ lt -p 4000`) then set API_URL on the .env file with the url given by localtunnel.
 2. Run local database `$ docker-compose up -d`
 3. Run migrations `$ migrate -path migrations -database "postgres://laporin:rahasia@localhost:5432/laporin_db?sslmode=disable" up`
 4. Run the app `$ yarn dev`
 5. GraphQL & Playground will be available at http://localhost:4000/graphql
 
-### Unit Tests
-TBD
+### Tests
+Run `yarn test`
