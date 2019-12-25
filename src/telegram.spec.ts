@@ -1,6 +1,16 @@
 require('dotenv').config({});
+import Faker from 'faker';
 import bot, { session } from './telegram';
 import db from './db';
+import { pushMetrics } from './prometheus';
+
+const getRandomLocation = (prefix: string) =>
+  parseFloat(
+    prefix +
+      Array.from(Array(5).keys())
+        .map(() => Faker.random.number(9))
+        .join('')
+  );
 
 describe('telegram integration', () => {
   const locationUpdate = {
@@ -41,7 +51,10 @@ describe('telegram integration', () => {
         date: 1574493929,
         text: 'Where are you now?',
       },
-      location: { latitude: -7.892945, longitude: 112.540309 },
+      location: {
+        latitude: getRandomLocation('-7.8'),
+        longitude: getRandomLocation('112.5'),
+      },
     },
   };
 
@@ -116,6 +129,7 @@ describe('telegram integration', () => {
   };
 
   afterAll(async () => {
+    await pushMetrics();
     await db.end();
     session.client.end(true);
   });

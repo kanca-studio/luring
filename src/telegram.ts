@@ -4,6 +4,7 @@ import sql from 'sql-tag';
 import db from './db';
 import { Reporter, Point, ServiceStatus } from './generated/graphql';
 import uuid from 'uuid';
+import { counter } from './prometheus';
 
 export const session = new RedisSession({
   store: {
@@ -133,20 +134,52 @@ bot.hears(['Offline', 'Online'], async ctx => {
     return;
   const { location, serviceID } = ctx.session.conversation;
   if (!location || !serviceID) return;
-  const INSERT_QUERY = sql`INSERT INTO service_status_report (id, service_status, reporter_id, service_id, location) VALUES (${uuid.v4()}, ${
+  const reportId = uuid.v4();
+  const INSERT_QUERY = sql`INSERT INTO service_status_report (id, service_status, reporter_id, service_id, location) VALUES (${reportId}, ${
     ctx.message.text
   }, ${
     reporter.id
   }, ${serviceID}, ST_GeomFromText(${`POINT(${location.lon} ${location.lat})`}, 4326))`;
   await db.query(INSERT_QUERY);
-  const { rows } = await db.query<{ name: string }>(
-    sql`SELECT name FROM service WHERE id=${serviceID}`
+  const { rows: reportRows } = await db.query<{
+    name_0: string;
+    name_1: string;
+    name_2: string;
+    name_3: string;
+    name_4: string;
+    service_name: string;
+    service_status: string;
+    place_id: number;
+    report_id: string;
+  }>(
+    sql`
+      SELECT
+        p.name_0, p.name_1, p.name_2, p.name_3, p.name_4, p.ogc_fid as place_id, ssr.service_status, ssr.id AS report_id, s.name AS service_name
+      FROM
+        places AS p, service_status_report AS ssr, service AS s
+      WHERE
+        ST_Contains(p.wkb_geometry, ssr.location) AND
+        ssr.service_id=s.id AND
+        ssr.id=${reportId}
+    `
   );
-  const service = rows[0];
-  if (!service) return;
+  const report = reportRows[0];
+  if (!report) return;
+  counter
+    .labels(
+      report.name_0,
+      report.name_1,
+      report.name_2,
+      report.name_3,
+      report.name_4,
+      report.service_status
+    )
+    .inc(1);
+
   if (process.env.NODE_ENV === 'test') return; // don't send anything during test
+
   ctx.reply(
-    `You reported that ${service.name} is currently ${ctx.message.text} at your location, thank you`,
+    `You reported that ${report.service_name} is currently ${ctx.message.text} at your location, thank you`,
     // @ts-ignore removeKeyboard should accept true
     Markup.removeKeyboard(true).extra()
   );

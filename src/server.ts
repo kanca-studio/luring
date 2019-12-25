@@ -3,14 +3,14 @@ dotenv.config({});
 import { importSchema } from 'graphql-import';
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
-import shortid from 'shortid';
 import { applyAuthMiddlewares, verifyAuth } from './auth';
 import resolvers from './resolvers';
 import telegramBot from './telegram';
+import { pushMetrics } from './prometheus';
 
-const telegramWebhookPath = `/telegram/${shortid()}`;
 const app = express();
-app.use(telegramBot.webhookCallback(telegramWebhookPath));
+telegramBot.telegram.deleteWebhook();
+telegramBot.startPolling();
 
 const gqlServer = new ApolloServer({
   typeDefs: importSchema('src/schema.graphql'),
@@ -25,5 +25,5 @@ gqlServer.applyMiddleware({ app });
 
 app.listen(process.env.PORT, () => {
   console.log(`Running on port ${process.env.PORT}`);
-  telegramBot.telegram.setWebhook(`${process.env.API_URL}${telegramWebhookPath}`);
+  pushMetrics(true);
 });
