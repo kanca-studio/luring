@@ -4,7 +4,16 @@ import sql from 'sql-tag';
 import db from './db';
 import { Reporter, Point, ServiceStatus } from './generated/graphql';
 import uuid from 'uuid';
-import { counter } from './prometheus';
+import { gauge } from './prometheus';
+import {
+  genLocationUpdate,
+  genReportServiceUpdate,
+  genReportOfflineUpdate,
+} from './seeds';
+
+const shouldAbort = () =>
+  process.env.NODE_ENV === 'test' ||
+  process.env.GENERATE_RANDOM_UPDATES === '1';
 
 export const session = new RedisSession({
   store: {
@@ -80,7 +89,7 @@ bot.on('location', async ctx => {
     const { rows } = await db.query<{ id: string; name: string }>(
       sql`SELECT id, name FROM service LIMIT 5`
     );
-    if (process.env.NODE_ENV === 'test') return; // don't send anything during test
+    if (shouldAbort) return; // don't send anything during test
     ctx.reply(
       'Which service do you want to report?',
       Markup.inlineKeyboard(
@@ -101,7 +110,7 @@ bot.action(/service-*/i, async ctx => {
   const { rows } = await db.query<{ id: string; name: string }>(
     sql`SELECT id, name FROM service LIMIT 5`
   );
-  if (process.env.NODE_ENV === 'test') return; // don't send anything during test
+  if (shouldAbort) return; // don't send anything during test
   await ctx.answerCbQuery();
   await ctx.editMessageReplyMarkup(
     Markup.inlineKeyboard(
@@ -165,18 +174,17 @@ bot.hears(['Offline', 'Online'], async ctx => {
   );
   const report = reportRows[0];
   if (!report) return;
-  counter
-    .labels(
-      report.name_0,
-      report.name_1,
-      report.name_2,
-      report.name_3,
-      report.name_4,
-      report.service_status
-    )
-    .inc(1);
+  const labeledGauge = gauge.labels(
+    report.name_0,
+    report.name_1,
+    report.name_2,
+    report.name_3,
+    report.name_4
+  );
+  if (report.service_status === 'Offline') labeledGauge.inc(1);
+  else labeledGauge.dec(1);
 
-  if (process.env.NODE_ENV === 'test') return; // don't send anything during test
+  if (shouldAbort) return; // don't send anything during test
 
   ctx.reply(
     `You reported that ${report.service_name} is currently ${ctx.message.text} at your location, thank you`,
@@ -187,12 +195,26 @@ bot.hears(['Offline', 'Online'], async ctx => {
 
 bot.hears('Abort Report', async ctx => {
   ctx.session.conversation = undefined;
-  if (process.env.NODE_ENV === 'test') return; // don't send anything during test
+  if (shouldAbort) return; // don't send anything during test
   ctx.reply(
     'Report aborted, thank you',
     // @ts-ignore removeKeyboard should accept true
     Markup.removeKeyboard(true).extra()
   );
 });
+
+const genRandomUpdate = async () => {
+  await bot.handleUpdate(genLocationUpdate());
+  await bot.handleUpdate(genReportServiceUpdate());
+  await bot.handleUpdate(genReportOfflineUpdate());
+  await new Promise(resolve => {
+    setTimeout(() => resolve(), 1000);
+  });
+  return genRandomUpdate();
+};
+
+if (process.env.GENERATE_RANDOM_UPDATES === '1') {
+  genRandomUpdate();
+}
 
 export default bot;
