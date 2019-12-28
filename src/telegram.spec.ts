@@ -1,7 +1,11 @@
 require('dotenv').config({});
 import bot, { session } from './telegram';
 import db from './db';
-import { genLocationUpdate, genReportServiceUpdate, genReportOfflineUpdate } from './seeds';
+import {
+  genLocationUpdate,
+  genReportServiceUpdate,
+  genReportOfflineUpdate,
+} from './seeds';
 
 describe('telegram integration', () => {
   afterAll(async () => {

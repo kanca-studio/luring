@@ -8,6 +8,7 @@ import bodyParser from 'body-parser';
 import { applyAuthMiddlewares, verifyAuth } from './auth';
 import resolvers from './resolvers';
 import telegramBot from './telegram';
+import db from './db';
 
 const app = express();
 app.use(bodyParser({ extended: true }));
@@ -24,7 +25,7 @@ const gqlServer = new ApolloServer({
   resolvers,
   context: async ({ req }) => {
     const visitor = await verifyAuth(req.headers.authorization);
-    return { visitor };
+    return { visitor, db };
   },
 });
 applyAuthMiddlewares({ app });

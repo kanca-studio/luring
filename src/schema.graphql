@@ -1,3 +1,6 @@
+scalar JSON
+scalar JSONObject
+
 enum ServiceStatus {
   ONLINE
   OFFLINE
@@ -29,23 +32,34 @@ type ServiceStatusReport {
   resolving: ServiceStatusReport
 }
 
-input PointInput {
-  lon: Float!
-  lat: Float!
+type PlaceName {
+  id: ID!
+  name: String!
+  level: Int!
+}
+
+type Place {
+  id: ID!
+  gid_0: String!
+  name_0: String!
+  gid_1: String!
+  name_1: String!
+  gid_2: String!
+  name_2: String!
+  gid_3: String!
+  name_3: String!
+  gid_4: String!
+  name_4: String!
+  geom: JSONObject
+}
+
+type OfflineStatus {
+  id: ID!
+  value: Int!
+  place: Place!
 }
 
 type Query {
-  serviceUptimePolygon(
-    serviceID: String!
-    status: ServiceStatus!
-    viewport: [PointInput!]!
-  ): [Point!]!
-}
-
-type Mutation {
-  reportServiceStatus(
-    serviceID: String!
-    status: ServiceStatus!
-    location: PointInput!
-  ): ServiceStatusReport!
+  name_2Places: [PlaceName!]
+  name_2OfflineStatus(gid_2: ID!): [OfflineStatus!]!
 }

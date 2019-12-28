@@ -1,44 +1,62 @@
 import Faker from 'faker';
-import { Resolvers } from './generated/graphql';
+import GraphQLJSON, { GraphQLJSONObject } from 'graphql-type-json';
+import { Resolvers, Place } from './generated/graphql';
 import { JwtPayload } from './auth';
+import { Pool } from 'pg';
+import Axios from 'axios';
+import sql from 'sql-tag';
+import { PrometheusQueryResponse } from './prometheus';
 
-type Context = {
+export type Context = {
   visitor: JwtPayload;
+  db: Pool;
 };
 
 const resolvers: Resolvers<Context> = {
-  Reporter: {
-    id: () => Faker.random.uuid(),
-    name: () => Faker.name.findName(),
-    phone: () => Faker.phone.phoneNumber(),
-  },
-  Service: {
-    id: () => Faker.random.uuid(),
-    name: () => Faker.company.companyName(),
+  JSON: GraphQLJSON,
+  JSONObject: GraphQLJSONObject,
+  OfflineStatus: {
+    place: async ({ id }: { id: string }, _, { db }) => {
+      const QUERY = sql`
+        SELECT
+          ogc_fid as id, name_1, name_2, name_3, name_4, gid_1, gid_2, gid_3, gid_4, ST_AsGeoJSON(wkb_geometry) as geom
+        FROM places
+        WHERE ogc_fid=${id}
+      `;
+      const { rows } = await db.query<Place>(QUERY);
+      const place = rows[0];
+      if (!place) throw new Error(`Place with id of ${id} doesn't exist`);
+      return { ...place, geom: JSON.parse(place.geom) };
+    },
   },
   Query: {
-    serviceUptimePolygon: () =>
-      Array.from(Array(10).keys()).map(() => ({
-        lat: parseFloat(Faker.address.latitude()),
-        lon: parseFloat(Faker.address.longitude()),
-      })),
-  },
-  Mutation: {
-    reportServiceStatus: (_, args) => ({
-      id: Faker.random.uuid(),
-      location: args.location,
-      reporter: {
-        id: Faker.random.uuid(),
-        name: Faker.name.findName(),
-        phone: Faker.phone.phoneNumber(),
-      },
-      reportedAt: new Date().valueOf(),
-      service: {
-        id: args.serviceID,
-        name: Faker.company.companyName(),
-      },
-      status: args.status,
-    }),
+    name_2Places: async (_, __, { db }) => {
+      const QUERY = sql`
+        SELECT DISTINCT gid_2, name_2 
+        FROM places`;
+      const { rows } = await db.query<{ gid_2: string; name_2: string }>(QUERY);
+      return rows.map(r => ({
+        id: r.gid_2,
+        name: r.name_2,
+        level: 2,
+      }));
+    },
+    name_2OfflineStatus: async (_, { gid_2 }) => {
+      const now = new Date();
+      now.setSeconds(0);
+      now.setMilliseconds(0);
+      const time = now.toISOString();
+      const resp = await Axios.get<PrometheusQueryResponse>(
+        process.env.PROMETHEUS_API_URL + '/v1/query',
+        {
+          params: { query: `service_offline_report{gid_2="${gid_2}"}`, time },
+        }
+      );
+      return resp.data.data.result.map(r => ({
+        id: r.metric.place_id,
+        value: r.value[1],
+      }));
+    },
   },
 };
 

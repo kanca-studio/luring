@@ -151,11 +151,11 @@ bot.hears(['Offline', 'Online'], async ctx => {
   }, ${serviceID}, ST_GeomFromText(${`POINT(${location.lon} ${location.lat})`}, 4326))`;
   await db.query(INSERT_QUERY);
   const { rows: reportRows } = await db.query<{
-    name_0: string;
-    name_1: string;
-    name_2: string;
-    name_3: string;
-    name_4: string;
+    gid_0: string;
+    gid_1: string;
+    gid_2: string;
+    gid_3: string;
+    gid_4: string;
     service_name: string;
     service_status: string;
     place_id: number;
@@ -163,7 +163,7 @@ bot.hears(['Offline', 'Online'], async ctx => {
   }>(
     sql`
       SELECT
-        p.name_0, p.name_1, p.name_2, p.name_3, p.name_4, p.ogc_fid as place_id, ssr.service_status, ssr.id AS report_id, s.name AS service_name
+        p.gid_0, p.gid_1, p.gid_2, p.gid_3, p.gid_4, p.ogc_fid as place_id, ssr.service_status, ssr.id AS report_id, s.name AS service_name
       FROM
         places AS p, service_status_report AS ssr, service AS s
       WHERE
@@ -175,11 +175,12 @@ bot.hears(['Offline', 'Online'], async ctx => {
   const report = reportRows[0];
   if (!report) return;
   const labeledGauge = gauge.labels(
-    report.name_0,
-    report.name_1,
-    report.name_2,
-    report.name_3,
-    report.name_4
+    report.gid_0,
+    report.gid_1,
+    report.gid_2,
+    report.gid_3,
+    report.gid_4,
+    report.place_id.toString()
   );
   if (report.service_status === 'Offline') labeledGauge.inc(1);
   else labeledGauge.dec(1);
