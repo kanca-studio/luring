@@ -95,7 +95,13 @@ export const genReportServiceUpdate = () => ({
       },
     },
     chat_instance: '-8328593660300049431',
-    data: 'service-243LuSST',
+    data: Faker.random.arrayElement([
+      'service-SmkmtBhT',
+      'service-243LuSST',
+      'service-IPbGxZBz',
+      'service-glVzWtHr',
+      'service-fRIvn-d5G',
+    ]),
   },
 });
 

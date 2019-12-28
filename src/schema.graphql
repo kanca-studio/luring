@@ -60,6 +60,7 @@ type OfflineStatus {
 }
 
 type Query {
-  name_2Places: [PlaceName!]
-  name_2OfflineStatus(gid_2: ID!): [OfflineStatus!]!
+  name_2Places: [PlaceName!]!
+  services: [Service!]!
+  name_2OfflineStatus(gid_2: ID!, serviceID: ID!): [OfflineStatus!]!
 }

@@ -156,6 +156,7 @@ bot.hears(['Offline', 'Online'], async ctx => {
     gid_2: string;
     gid_3: string;
     gid_4: string;
+    service_id: string;
     service_name: string;
     service_status: string;
     place_id: number;
@@ -163,7 +164,16 @@ bot.hears(['Offline', 'Online'], async ctx => {
   }>(
     sql`
       SELECT
-        p.gid_0, p.gid_1, p.gid_2, p.gid_3, p.gid_4, p.ogc_fid as place_id, ssr.service_status, ssr.id AS report_id, s.name AS service_name
+        p.gid_0,
+        p.gid_1,
+        p.gid_2,
+        p.gid_3,
+        p.gid_4,
+        p.ogc_fid AS place_id,
+        ssr.service_status,
+        ssr.id AS report_id,
+        s.name AS service_name,
+        s.id AS service_id
       FROM
         places AS p, service_status_report AS ssr, service AS s
       WHERE
@@ -180,7 +190,8 @@ bot.hears(['Offline', 'Online'], async ctx => {
     report.gid_2,
     report.gid_3,
     report.gid_4,
-    report.place_id.toString()
+    report.place_id.toString(),
+    report.service_id
   );
   if (report.service_status === 'Offline') labeledGauge.inc(1);
   else labeledGauge.dec(1);

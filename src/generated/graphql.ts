@@ -20,17 +20,6 @@ export type Scalars = {
   JSON: any;
 };
 
-export type Mutation = {
-  __typename?: 'Mutation';
-  reportServiceStatus: ServiceStatusReport;
-};
-
-export type MutationReportServiceStatusArgs = {
-  serviceID: Scalars['String'];
-  status: ServiceStatus;
-  location: PointInput;
-};
-
 export type OfflineStatus = {
   __typename?: 'OfflineStatus';
   id: Scalars['ID'];
@@ -67,26 +56,16 @@ export type Point = {
   lat: Scalars['Float'];
 };
 
-export type PointInput = {
-  lon: Scalars['Float'];
-  lat: Scalars['Float'];
-};
-
 export type Query = {
   __typename?: 'Query';
-  serviceUptimePolygon: Array<Point>;
-  name_2Places?: Maybe<Array<PlaceName>>;
+  name_2Places: Array<PlaceName>;
+  services: Array<Service>;
   name_2OfflineStatus: Array<OfflineStatus>;
-};
-
-export type QueryServiceUptimePolygonArgs = {
-  serviceID: Scalars['String'];
-  status: ServiceStatus;
-  viewport: Array<PointInput>;
 };
 
 export type QueryName_2OfflineStatusArgs = {
   gid_2: Scalars['ID'];
+  serviceID: Scalars['ID'];
 };
 
 export type Reporter = {
@@ -222,45 +201,41 @@ export type DirectiveResolverFn<
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
-  String: ResolverTypeWrapper<Partial<Scalars['String']>>;
-  ServiceStatus: ResolverTypeWrapper<Partial<ServiceStatus>>;
-  PointInput: ResolverTypeWrapper<Partial<PointInput>>;
-  Float: ResolverTypeWrapper<Partial<Scalars['Float']>>;
-  Point: ResolverTypeWrapper<Partial<Point>>;
   PlaceName: ResolverTypeWrapper<Partial<PlaceName>>;
   ID: ResolverTypeWrapper<Partial<Scalars['ID']>>;
+  String: ResolverTypeWrapper<Partial<Scalars['String']>>;
   Int: ResolverTypeWrapper<Partial<Scalars['Int']>>;
+  Service: ResolverTypeWrapper<Partial<Service>>;
   OfflineStatus: ResolverTypeWrapper<Partial<OfflineStatus>>;
   Place: ResolverTypeWrapper<Partial<Place>>;
   JSONObject: ResolverTypeWrapper<Partial<Scalars['JSONObject']>>;
-  Mutation: ResolverTypeWrapper<{}>;
-  ServiceStatusReport: ResolverTypeWrapper<Partial<ServiceStatusReport>>;
-  Reporter: ResolverTypeWrapper<Partial<Reporter>>;
-  Service: ResolverTypeWrapper<Partial<Service>>;
   Boolean: ResolverTypeWrapper<Partial<Scalars['Boolean']>>;
   JSON: ResolverTypeWrapper<Partial<Scalars['JSON']>>;
+  ServiceStatus: ResolverTypeWrapper<Partial<ServiceStatus>>;
+  Point: ResolverTypeWrapper<Partial<Point>>;
+  Float: ResolverTypeWrapper<Partial<Scalars['Float']>>;
+  Reporter: ResolverTypeWrapper<Partial<Reporter>>;
+  ServiceStatusReport: ResolverTypeWrapper<Partial<ServiceStatusReport>>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Query: {};
-  String: Partial<Scalars['String']>;
-  ServiceStatus: Partial<ServiceStatus>;
-  PointInput: Partial<PointInput>;
-  Float: Partial<Scalars['Float']>;
-  Point: Partial<Point>;
   PlaceName: Partial<PlaceName>;
   ID: Partial<Scalars['ID']>;
+  String: Partial<Scalars['String']>;
   Int: Partial<Scalars['Int']>;
+  Service: Partial<Service>;
   OfflineStatus: Partial<OfflineStatus>;
   Place: Partial<Place>;
   JSONObject: Partial<Scalars['JSONObject']>;
-  Mutation: {};
-  ServiceStatusReport: Partial<ServiceStatusReport>;
-  Reporter: Partial<Reporter>;
-  Service: Partial<Service>;
   Boolean: Partial<Scalars['Boolean']>;
   JSON: Partial<Scalars['JSON']>;
+  ServiceStatus: Partial<ServiceStatus>;
+  Point: Partial<Point>;
+  Float: Partial<Scalars['Float']>;
+  Reporter: Partial<Reporter>;
+  ServiceStatusReport: Partial<ServiceStatusReport>;
 };
 
 export interface JsonScalarConfig
@@ -272,21 +247,6 @@ export interface JsonObjectScalarConfig
   extends GraphQLScalarTypeConfig<ResolversTypes['JSONObject'], any> {
   name: 'JSONObject';
 }
-
-export type MutationResolvers<
-  ContextType = Context,
-  ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']
-> = {
-  reportServiceStatus?: Resolver<
-    ResolversTypes['ServiceStatusReport'],
-    ParentType,
-    ContextType,
-    RequireFields<
-      MutationReportServiceStatusArgs,
-      'serviceID' | 'status' | 'location'
-    >
-  >;
-};
 
 export type OfflineStatusResolvers<
   ContextType = Context,
@@ -336,17 +296,13 @@ export type QueryResolvers<
   ContextType = Context,
   ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']
 > = {
-  serviceUptimePolygon?: Resolver<
-    Array<ResolversTypes['Point']>,
-    ParentType,
-    ContextType,
-    RequireFields<
-      QueryServiceUptimePolygonArgs,
-      'serviceID' | 'status' | 'viewport'
-    >
-  >;
   name_2Places?: Resolver<
-    Maybe<Array<ResolversTypes['PlaceName']>>,
+    Array<ResolversTypes['PlaceName']>,
+    ParentType,
+    ContextType
+  >;
+  services?: Resolver<
+    Array<ResolversTypes['Service']>,
     ParentType,
     ContextType
   >;
@@ -354,7 +310,7 @@ export type QueryResolvers<
     Array<ResolversTypes['OfflineStatus']>,
     ParentType,
     ContextType,
-    RequireFields<QueryName_2OfflineStatusArgs, 'gid_2'>
+    RequireFields<QueryName_2OfflineStatusArgs, 'gid_2' | 'serviceID'>
   >;
 };
 
@@ -395,7 +351,6 @@ export type ServiceStatusReportResolvers<
 export type Resolvers<ContextType = Context> = {
   JSON?: GraphQLScalarType;
   JSONObject?: GraphQLScalarType;
-  Mutation?: MutationResolvers<ContextType>;
   OfflineStatus?: OfflineStatusResolvers<ContextType>;
   Place?: PlaceResolvers<ContextType>;
   PlaceName?: PlaceNameResolvers<ContextType>;

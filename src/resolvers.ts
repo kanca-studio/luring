@@ -41,7 +41,12 @@ const resolvers: Resolvers<Context> = {
         level: 2,
       }));
     },
-    name_2OfflineStatus: async (_, { gid_2 }) => {
+    services: async (_, __, { db }) => {
+      const QUERY = sql`SELECT id, name FROM service`;
+      const { rows } = await db.query<{ id: string; name: string }>(QUERY);
+      return rows;
+    },
+    name_2OfflineStatus: async (_, { gid_2, serviceID }) => {
       const now = new Date();
       now.setSeconds(0);
       now.setMilliseconds(0);
@@ -49,7 +54,10 @@ const resolvers: Resolvers<Context> = {
       const resp = await Axios.get<PrometheusQueryResponse>(
         process.env.PROMETHEUS_API_URL + '/v1/query',
         {
-          params: { query: `service_offline_report{gid_2="${gid_2}"}`, time },
+          params: {
+            query: `service_offline_report{gid_2="${gid_2}", service_id="${serviceID}"}`,
+            time,
+          },
         }
       );
       return resp.data.data.result.map(r => ({
