@@ -11,7 +11,7 @@ import resolvers from './resolvers';
 import telegramBot from './telegram';
 import db from './db';
 
-const whitelist = new Set(['http://localhost:3000']);
+const whitelist = new Set(process.env.CORS_WHITELIST.split(','));
 const app = express();
 app.use(bodyParser({ extended: true }));
 app.use(
