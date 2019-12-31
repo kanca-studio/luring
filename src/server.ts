@@ -5,13 +5,24 @@ import { importSchema } from 'graphql-import';
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import { applyAuthMiddlewares, verifyAuth } from './auth';
 import resolvers from './resolvers';
 import telegramBot from './telegram';
 import db from './db';
 
+const whitelist = new Set(['http://localhost:3000']);
 const app = express();
 app.use(bodyParser({ extended: true }));
+app.use(
+  cors({
+    optionsSuccessStatus: 200,
+    origin: (host, cb) => {
+      if (whitelist.has(host) || !host) cb(null, true);
+      else cb(new Error(`The following host is not in the whitelist: ${host}`));
+    },
+  })
+);
 
 app.get('/metrics', (req, res) => {
   res.send(register.metrics());

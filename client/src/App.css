@@ -1,0 +1,10 @@
+
+
+.no-scrollbar {
+  margin: 0 -1rem;
+  padding: 0.5rem 1rem;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

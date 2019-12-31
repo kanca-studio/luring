@@ -220,7 +220,7 @@ const genRandomUpdate = async () => {
   await bot.handleUpdate(genReportServiceUpdate());
   await bot.handleUpdate(genReportOfflineUpdate());
   await new Promise(resolve => {
-    setTimeout(() => resolve(), 1000);
+    setTimeout(() => resolve(), 5000);
   });
   return genRandomUpdate();
 };

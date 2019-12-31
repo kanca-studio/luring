@@ -40,13 +40,15 @@ export type Place = {
   name_3: Scalars['String'];
   gid_4: Scalars['String'];
   name_4: Scalars['String'];
-  geom?: Maybe<Scalars['JSONObject']>;
+  centerToName2: Scalars['Boolean'];
+  geom: Scalars['JSONObject'];
 };
 
 export type PlaceName = {
   __typename?: 'PlaceName';
   id: Scalars['ID'];
   name: Scalars['String'];
+  point: Point;
   level: Scalars['Int'];
 };
 
@@ -79,6 +81,7 @@ export type Service = {
   __typename?: 'Service';
   id: Scalars['ID'];
   name: Scalars['String'];
+  icon: Scalars['String'];
 };
 
 export enum ServiceStatus {
@@ -204,16 +207,16 @@ export type ResolversTypes = {
   PlaceName: ResolverTypeWrapper<Partial<PlaceName>>;
   ID: ResolverTypeWrapper<Partial<Scalars['ID']>>;
   String: ResolverTypeWrapper<Partial<Scalars['String']>>;
+  Point: ResolverTypeWrapper<Partial<Point>>;
+  Float: ResolverTypeWrapper<Partial<Scalars['Float']>>;
   Int: ResolverTypeWrapper<Partial<Scalars['Int']>>;
   Service: ResolverTypeWrapper<Partial<Service>>;
   OfflineStatus: ResolverTypeWrapper<Partial<OfflineStatus>>;
   Place: ResolverTypeWrapper<Partial<Place>>;
-  JSONObject: ResolverTypeWrapper<Partial<Scalars['JSONObject']>>;
   Boolean: ResolverTypeWrapper<Partial<Scalars['Boolean']>>;
+  JSONObject: ResolverTypeWrapper<Partial<Scalars['JSONObject']>>;
   JSON: ResolverTypeWrapper<Partial<Scalars['JSON']>>;
   ServiceStatus: ResolverTypeWrapper<Partial<ServiceStatus>>;
-  Point: ResolverTypeWrapper<Partial<Point>>;
-  Float: ResolverTypeWrapper<Partial<Scalars['Float']>>;
   Reporter: ResolverTypeWrapper<Partial<Reporter>>;
   ServiceStatusReport: ResolverTypeWrapper<Partial<ServiceStatusReport>>;
 };
@@ -224,16 +227,16 @@ export type ResolversParentTypes = {
   PlaceName: Partial<PlaceName>;
   ID: Partial<Scalars['ID']>;
   String: Partial<Scalars['String']>;
+  Point: Partial<Point>;
+  Float: Partial<Scalars['Float']>;
   Int: Partial<Scalars['Int']>;
   Service: Partial<Service>;
   OfflineStatus: Partial<OfflineStatus>;
   Place: Partial<Place>;
-  JSONObject: Partial<Scalars['JSONObject']>;
   Boolean: Partial<Scalars['Boolean']>;
+  JSONObject: Partial<Scalars['JSONObject']>;
   JSON: Partial<Scalars['JSON']>;
   ServiceStatus: Partial<ServiceStatus>;
-  Point: Partial<Point>;
-  Float: Partial<Scalars['Float']>;
   Reporter: Partial<Reporter>;
   ServiceStatusReport: Partial<ServiceStatusReport>;
 };
@@ -272,7 +275,8 @@ export type PlaceResolvers<
   name_3?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   gid_4?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name_4?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  geom?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  centerToName2?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  geom?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
 };
 
 export type PlaceNameResolvers<
@@ -281,6 +285,7 @@ export type PlaceNameResolvers<
 > = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  point?: Resolver<ResolversTypes['Point'], ParentType, ContextType>;
   level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 };
 
@@ -329,6 +334,7 @@ export type ServiceResolvers<
 > = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  icon?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
 export type ServiceStatusReportResolvers<

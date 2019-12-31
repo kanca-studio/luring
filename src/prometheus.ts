@@ -8,7 +8,7 @@ const labelNames: Array<keyof Metric> = [
   'gid_4',
   'place_id',
   'service_id',
-]
+];
 
 export const gauge = new Gauge({
   name: 'service_offline_report',

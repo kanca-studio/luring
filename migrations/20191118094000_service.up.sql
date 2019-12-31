@@ -1,13 +1,14 @@
 CREATE TABLE IF NOT EXISTS service (
     id VARCHAR(15) PRIMARY KEY,
-    name VARCHAR(50)
+    name VARCHAR(50),
+    icon VARCHAR(50)
 );
 
 INSERT INTO
-    service (id, name)
+    service (id, name, icon)
 VALUES
-    ('SmkmtBhT', 'PDAM'),
-    ('243LuSST', 'PLN'),
-    ('IPbGxZBz', 'Indihome'),
-    ('glVzWtHr', 'First Media'),
-    ('fRIvn-d5G', 'MNC')
+    ('SmkmtBhT', 'PDAM', 'water'),
+    ('243LuSST', 'PLN', 'plug'),
+    ('IPbGxZBz', 'Indihome', 'wifi'),
+    ('glVzWtHr', 'First Media', 'wifi'),
+    ('fRIvn-d5G', 'MNC', 'wifi')

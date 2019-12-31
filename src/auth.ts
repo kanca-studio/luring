@@ -12,16 +12,20 @@ export type JwtPayload = {
   visitorType: VisitorType;
 };
 
-export const verifyAuth = async (authHeader: string) => {
-  const token = authHeader.split('Bearer ')[1];
-  const visitor: JwtPayload = await new Promise<JwtPayload>(
-    (resolve, reject) => {
-      jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
-        err ? reject(err) : resolve(payload as JwtPayload);
-      });
-    }
-  );
-  return visitor;
+export const verifyAuth = async (authHeader: string): Promise<JwtPayload> => {
+  try {
+    const token = authHeader.split('Bearer ')[1];
+    const visitor: JwtPayload = await new Promise<JwtPayload>(
+      (resolve, reject) => {
+        jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
+          err ? reject(err) : resolve(payload as JwtPayload);
+        });
+      }
+    );
+    return visitor;
+  } catch (error) {
+    return { subject: 'anonymous', visitorType: VisitorType.Viewer };
+  }
 };
 
 export const applyAuthMiddlewares = (options: { app: Application }) => {

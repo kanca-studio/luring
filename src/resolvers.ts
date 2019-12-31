@@ -26,24 +26,41 @@ const resolvers: Resolvers<Context> = {
       const { rows } = await db.query<Place>(QUERY);
       const place = rows[0];
       if (!place) throw new Error(`Place with id of ${id} doesn't exist`);
-      return { ...place, geom: JSON.parse(place.geom) };
+      return {
+        ...place,
+        centerToName2: place.name_2 === place.name_3,
+        geom: JSON.parse(place.geom),
+      };
     },
   },
   Query: {
     name_2Places: async (_, __, { db }) => {
       const QUERY = sql`
-        SELECT DISTINCT gid_2, name_2 
-        FROM places`;
-      const { rows } = await db.query<{ gid_2: string; name_2: string }>(QUERY);
+        SELECT p.gid_2, p.name_2, MIN(c.lat) as lat, MIN(c.lng) as lng
+        FROM places p, cities c
+        WHERE p.name_2 = c.city
+        GROUP BY gid_2, name_2
+        ORDER BY name_2`;
+      const { rows } = await db.query<{
+        gid_2: string;
+        name_2: string;
+        lat: number;
+        lng: number;
+      }>(QUERY);
       return rows.map(r => ({
         id: r.gid_2,
         name: r.name_2,
         level: 2,
+        point: { lat: r.lat, lon: r.lng },
       }));
     },
     services: async (_, __, { db }) => {
-      const QUERY = sql`SELECT id, name FROM service`;
-      const { rows } = await db.query<{ id: string; name: string }>(QUERY);
+      const QUERY = sql`SELECT id, name, icon FROM service`;
+      const { rows } = await db.query<{
+        id: string;
+        name: string;
+        icon: string;
+      }>(QUERY);
       return rows;
     },
     name_2OfflineStatus: async (_, { gid_2, serviceID }) => {

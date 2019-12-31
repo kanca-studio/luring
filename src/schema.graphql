@@ -14,6 +14,7 @@ type Point {
 type Service {
   id: ID!
   name: String!
+  icon: String!
 }
 
 type Reporter {
@@ -35,6 +36,7 @@ type ServiceStatusReport {
 type PlaceName {
   id: ID!
   name: String!
+  point: Point!
   level: Int!
 }
 
@@ -50,7 +52,8 @@ type Place {
   name_3: String!
   gid_4: String!
   name_4: String!
-  geom: JSONObject
+  centerToName2: Boolean!
+  geom: JSONObject!
 }
 
 type OfflineStatus {

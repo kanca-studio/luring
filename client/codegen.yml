@@ -1,0 +1,11 @@
+overwrite: true
+schema: '../src/schema.graphql'
+documents: 'src/graphql/**/*.ts'
+generates:
+  src/graphql/types.ts:
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+    config:
+      scalars:
+        JSONObject: '{ [key: string]: any }'
