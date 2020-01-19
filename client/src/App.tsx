@@ -9,6 +9,8 @@ import './App.css';
 import useServicesQuery from './graphql/queries/useServicesQuery';
 import usePlacesQuery from './graphql/queries/usePlacesQuery';
 import useOfflineStatusQuery from './graphql/queries/useOfflineStatusQuery';
+import { parse } from 'query-string';
+import { findBestMatch } from 'string-similarity';
 
 enum Bucket {
   Empty = 0,
@@ -37,7 +39,7 @@ const Legends = () => {
     <>
       <p className="text-primary text-xs mb-1">Reports</p>
       {Array.from(bucketColorsMap.entries()).map(([bucket, color]) => (
-        <div className="flex flex-1">
+        <div className="flex flex-1" key={bucket}>
           <div className="flex-1 la la-square mr-1" style={{ color }}></div>
           <div className="text-xs text-primary"> > {bucket}</div>
         </div>
@@ -47,15 +49,39 @@ const Legends = () => {
 };
 
 const App: React.FC = () => {
+  const mapOptions = React.useMemo(() => parse(window.location.search), []);
   const [viewport, setViewport] = React.useState<Viewport>({
     center: [-7.8831, 112.5334],
     zoom: 12,
   });
-  const services = useServicesQuery();
   const [activeService, setActiveService] = React.useState('SmkmtBhT');
+  const services = useServicesQuery();
+  const servicesByName = React.useMemo(
+    () =>
+      new Map(
+        services.data?.services.map(service => [service.name, service]) || []
+      ),
+    [services.data]
+  );
+  React.useEffect(() => {
+    if (!services.data || typeof mapOptions.service !== 'string') return;
+    const matches = findBestMatch(
+      mapOptions.service,
+      Array.from(servicesByName.keys())
+    );
+    const serviceFromParams = servicesByName.get(matches.bestMatch.target);
+    if (serviceFromParams) setActiveService(serviceFromParams.id);
+  }, [services.data]);
   const places = usePlacesQuery();
   const placesMap = React.useMemo(
     () => new Map(places.data?.name_2Places.map(p => [p.id, p]) || []),
+    [places.data]
+  );
+  const placesByName = React.useMemo(
+    () =>
+      new Map(
+        places.data?.name_2Places.map(place => [place.name, place]) || []
+      ),
     [places.data]
   );
   const [activePlace, setActivePlace] = React.useState<{
@@ -63,13 +89,28 @@ const App: React.FC = () => {
     name: string;
     point: { lat: number; lon: number };
   }>({
-    id: 'IDN.11.3_1',
-    name: 'Batu',
+    id: 'IDN.7.2_1',
+    name: 'Jakarta Pusat',
     point: {
-      lat: -7.895628,
-      lon: 112.536418,
+      lat: -6.1818,
+      lon: 106.8223,
     },
   });
+  React.useEffect(() => {
+    setViewport(v => ({
+      ...v,
+      center: [activePlace.point.lat, activePlace.point.lon],
+    }));
+  }, [activePlace]);
+  React.useEffect(() => {
+    if (!places.data || typeof mapOptions.place !== 'string') return;
+    const matches = findBestMatch(
+      mapOptions.place,
+      Array.from(placesByName.keys())
+    );
+    const placeFromParams = placesByName.get(matches.bestMatch.target);
+    if (placeFromParams) setActivePlace(placeFromParams);
+  }, [places.data]);
   const offlineStatus = useOfflineStatusQuery({
     gid_2: activePlace.id,
     serviceID: activeService,
@@ -79,10 +120,6 @@ const App: React.FC = () => {
       const place = placesMap.get(e.currentTarget.value);
       if (place) {
         setActivePlace(place);
-        setViewport(v => ({
-          ...v,
-          center: [place.point.lat, place.point.lon],
-        }));
       }
     },
     [placesMap]

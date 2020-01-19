@@ -5,7 +5,9 @@ import { ApolloProvider } from 'react-apollo';
 import './index.css';
 import App from './App';
 
-const client = new ApolloClient({ uri: process.env.REACT_APP_GRAPHQL_ENDPOINT });
+const client = new ApolloClient({
+  uri: process.env.REACT_APP_GRAPHQL_ENDPOINT,
+});
 
 ReactDOM.render(
   <ApolloProvider client={client}>
